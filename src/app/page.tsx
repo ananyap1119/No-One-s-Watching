@@ -237,7 +237,7 @@ export default function Home() {
   const [burnIdx, setBurnIdx] = useState(0);
   // Precompute X positions for short texts
   // No special positions for short texts; always randomize
-  const burnXPositions = null;
+  const _burnXPositions = null;
   useEffect(() => {
     if (phase !== "burning") {
       setFloatingChunks([]);
@@ -269,7 +269,7 @@ export default function Home() {
         setBurnIdx(nextIdx);
         return;
       }
-      const x = Math.random() * 100;
+      const _x = Math.random() * 100;
       const clampedX = 6 + Math.random() * 88;
       const y = 6 + Math.random() * 24;
       const delay = 0.1 + Math.random() * 0.5;
@@ -297,12 +297,12 @@ export default function Home() {
     setFloatingChunks(chunks => chunks.filter(c => c.key !== key));
   }
 
-  const oceanChunks = getOceanChunks(text);
+  const _oceanChunks = getOceanChunks(text);
 
   return (
     <div className={styles.nwPage}>
       <header className={styles.nwHeader} style={{display: phase === 'entry' ? undefined : 'none'}}>
-        <h1 className={styles.nwTitle}>No One's Watching</h1>
+      <h1 className={styles.nwTitle}>No One&apos;s Watching</h1>
         <p className={styles.nwSubtitle}>Say it. Feel it. Let it go.</p>
       </header>
       <main className={styles.nwMain}>
@@ -455,7 +455,6 @@ export default function Home() {
                       idx={i}
                       total={oceanChunksArr.length}
                       oceanPhase={true}
-                      // @ts-ignore
                       forceDelay={delay}
                       forceDuration={duration}
                     />
@@ -552,7 +551,7 @@ export default function Home() {
               <>
                 <div className={styles.emberParticles} style={{left: 0, right: 0, bottom: 0, width: '100vw', height: '40vh', position: 'fixed', pointerEvents: 'none', zIndex: 11}}>
                   {Array.from({length: 18}).map((_, i) => {
-                    let style: React.CSSProperties = {
+                    const style: React.CSSProperties = {
                       left: '',
                       bottom: `${Math.random() * 38}%`,
                       animationDelay: `${Math.random() * 2.5}s`,
@@ -582,10 +581,10 @@ export default function Home() {
                   })}
                 </div>
                 <div className={styles.goneTextCompelling + ' ' + styles.goneTextTherapeutic}>
-                  <div className={styles.goneTextMain}>It's gone now.</div>
+                  <div className={styles.goneTextMain}>It&apos;s gone now.</div>
                   {showGoneSub && (
                     <div className={styles.goneTextSub + ' ' + styles.goneTextRelease + ' ' + styles.goneTextSoft}>
-                      You don't have to carry it anymore.
+                      You don&apos;t have to carry it anymore.
                     </div>
                   )}
                 </div>
@@ -600,7 +599,7 @@ export default function Home() {
               <>
                 <div className={styles.emberParticles} style={{left: 0, right: 0, top: 0, width: '100vw', height: '100vh', position: 'fixed', pointerEvents: 'none', zIndex: 11}}>
                   {Array.from({length: 18}).map((_, i) => {
-                    let style: React.CSSProperties = {
+                    const style: React.CSSProperties = {
                       left: '',
                       top: '',
                       animationDelay: `${Math.random() * 2.5}s`,
@@ -674,10 +673,10 @@ export default function Home() {
                     marginBottom: '0.2em',
                     letterSpacing: '-1px',
                     textAlign: 'center'
-                  }}>It's at peace now.</div>
+                  }}>It&apos;s at peace now.</div>
                   {showGoneSub && (
                     <div className={styles.goneTextSub + ' ' + styles.goneTextRelease + ' ' + styles.goneTextSoft} style={{color: '#e2f4f3', textShadow: '0 0 6px #b8dcf3, 0 1px 6px #aee1f9'}}>
-                      The tide has taken it far from you. You're allowed to let go.
+                      The tide has taken it far from you. You&apos;re allowed to let go.
                     </div>
                   )}
                 </div>
@@ -773,7 +772,7 @@ export default function Home() {
                     letterSpacing: '-1px',
                     textAlign: 'center',
                     whiteSpace: 'nowrap'
-                  }}>It's floating among constellations now.</div>
+                  }}>It&apos;s floating among constellations now.</div>
                   {showGoneSub && (
                     <div className={styles.goneTextSub + ' ' + styles.goneTextRelease + ' ' + styles.goneTextSoft} style={{
                       color: '#B4C6EC',
@@ -781,7 +780,7 @@ export default function Home() {
                       fontSize: '1.125rem',
                       textShadow: '0px 0px 4px #A183FF'
                     }}>
-                      Not even the moon could tell on you. That secret's safe.
+                      Not even the moon could tell on you. That secret&apos;s safe.
                     </div>
                   )}
                 </div>
@@ -832,7 +831,7 @@ function BurningWord({ text, x, y, delay, onFade }: { text: string, x: number, y
 }
 
 // Add OceanDriftWord component at the end of the file
-function OceanDriftWord({ text, idx, total, oceanPhase, forceDelay, forceDuration }: { text: string, idx: number, total: number, oceanPhase?: boolean, forceDelay?: number, forceDuration?: number }) {
+function OceanDriftWord({ text, idx, _total, oceanPhase, forceDelay, forceDuration }: { text: string, idx: number, _total: number, oceanPhase?: boolean, forceDelay?: number, forceDuration?: number }) {
   // Randomize animation delay, sine offset, scale, and rotation
   const delay = forceDelay !== undefined ? forceDelay : (oceanPhase ? idx * 0.7 : 0.2 + Math.random() * 1.5 + idx * 0.44);
   const duration = forceDuration !== undefined ? forceDuration : (oceanPhase ? 7.5 + Math.random() * 2.5 : 7.5 + Math.random() * 2.5);
@@ -895,7 +894,7 @@ function OceanDriftWord({ text, idx, total, oceanPhase, forceDelay, forceDuratio
   );
 }
 
-function SkyDriftWord({ text, idx, total }: { text: string, idx: number, total: number }) {
+function SkyDriftWord({ text, idx, _total }: { text: string, idx: number, _total: number }) {
   // Sky animation: words appear calmly, twinkle once, morph to ball, disappear
   const delay = idx * 4; // Calm, slow entry
   const animDuration = 5.2; // 2s fade in + 2s twinkle + 1.2s morph/fade
@@ -905,19 +904,19 @@ function SkyDriftWord({ text, idx, total }: { text: string, idx: number, total: 
   // Ensure all words are gone at least 2s before phase ends
   const totalPhaseDurationSec = (getFireDuration(text.split(/\s+/).filter(Boolean).length) + 12000) / 1000;
   const maxIdx = Math.floor((totalPhaseDurationSec - 2 - animDuration) / 4);
-  if (idx > maxIdx) return null;
 
   // All hooks must be called unconditionally
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (idx > maxIdx) return;
     const show = setTimeout(() => setVisible(true), delay * 1000);
     const hide = setTimeout(() => setVisible(false), (delay + animDuration) * 1000);
     return () => { clearTimeout(show); clearTimeout(hide); };
-  }, [delay, animDuration]);
+  }, [idx, maxIdx, delay, animDuration]);
 
-  if (!visible) return null;
-
+  // Return early after hooks are defined
+  if (idx > maxIdx || !visible) return null;
   return (
     <span
       className={styles.skyDriftWord + ' ' + styles.skwTwinkleToBall}
