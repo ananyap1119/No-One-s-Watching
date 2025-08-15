@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono, Playfair_Display } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react"; // Added for Vercel Analytics
 import "./globals.css";
 
 const geistSans = Inter({
@@ -34,6 +35,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable}`}
       >
         {children}
+        <Analytics /> {/* Added here */}
       </body>
     </html>
   );
