@@ -453,7 +453,7 @@ export default function Home() {
                       key={i}
                       text={chunk}
                       idx={i}
-                      total={oceanChunksArr.length}
+                      _total={oceanChunksArr.length}
                       oceanPhase={true}
                       forceDelay={delay}
                       forceDuration={duration}
@@ -487,7 +487,7 @@ export default function Home() {
                   key={i}
                   text={chunk}
                   idx={i}
-                  total={getTextChunks(text).length}
+                  _total={getTextChunks(text).length}
                 />
               ))}
             </div>
