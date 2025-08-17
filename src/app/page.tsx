@@ -415,7 +415,7 @@ export default function Home() {
             <video
               key={showVideo ? 'ocean-on' : 'ocean-off'}
               className={styles.fireVideoBg}
-              src="/animations/ocean.mp4.mp4"
+              src="/animations/ocean.mp4"
               autoPlay
               muted
               playsInline
@@ -472,7 +472,7 @@ export default function Home() {
             <video
               key={showVideo ? 'sky-on' : 'sky-off'}
               className={styles.fireVideoBg}
-              src="/animations/nightsky.mp4.mp4"
+              src="/animations/nightsky.mp4"
               autoPlay
               muted
               playsInline
@@ -501,7 +501,7 @@ export default function Home() {
             <video
               key={showVideo ? 'fire-on' : 'fire-off'}
               className={styles.fireVideoBg}
-              src="/animations/fire.mp4.mp4"
+              src="/animations/fire.mp4"
               autoPlay
               muted
               playsInline
