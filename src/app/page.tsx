@@ -430,24 +430,14 @@ export default function Home() {
               {/* Calculate maxTime as in handleLetGo for ocean */}
               {(() => {
                 const oceanChunksArr = getOceanChunks(text);
-                let maxTime = 0;
-                for (let i = 0; i < oceanChunksArr.length; i++) {
-                  const delay = i * 1.2; // SLOWER: increase delay between words
-                  const duration = 7.5 + Math.random() * 2.5;
-                  const total = delay + duration;
-                  if (total > maxTime) maxTime = total;
-                }
-                // All words must disappear at least 5s before maxTime
-                const disappearTime = maxTime - 5;
+                const videoDuration = 30; // seconds (adjust if your actual video length differs)
+                const padding = 3; // seconds to leave empty at end before fade
+                const availableTime = videoDuration - padding;
+                const delayPerWord = availableTime / oceanChunksArr.length;
+              
                 return oceanChunksArr.map((chunk, i) => {
-                  // Clamp each word's delay+duration to disappearTime
-                  const delay = i * 1.2; // SLOWER: increase delay between words
-                  // If delay > disappearTime, skip rendering this word
-                  if (delay > disappearTime) return null;
-                  // duration so that delay+duration <= disappearTime
-                  const maxDuration = Math.max(1, disappearTime - delay);
-                  // Use a random duration up to maxDuration
-                  const duration = Math.min(7.5 + Math.random() * 2.5, maxDuration);
+                  const delay = i * delayPerWord;
+                  const duration = delayPerWord * 0.8;
                   return (
                     <OceanDriftWord
                       key={i}
@@ -895,28 +885,30 @@ function OceanDriftWord({ text, idx, _total, oceanPhase, forceDelay, forceDurati
 }
 
 function SkyDriftWord({ text, idx, _total }: { text: string, idx: number, _total: number }) {
-  // Sky animation: words appear calmly, twinkle once, morph to ball, disappear
-  const delay = idx * 4; // Calm, slow entry
-  const animDuration = 5.2; // 2s fade in + 2s twinkle + 1.2s morph/fade
+  // Nightsky video duration (adjust if actual video differs)
+  const videoDuration = 40; // seconds
+  const padding = 3; // leave a few seconds at the end
+  const availableTime = videoDuration - padding;
+
+  // Calculate per-word timing
+  const delayPerWord = availableTime / _total;
+  const delay = idx * delayPerWord;
+  const animDuration = delayPerWord * 0.9; // each word occupies ~90% of its slot
+
+  // Random starting positions for floating effect
   const xStart = 10 + Math.random() * 80;
   const yStart = 15 + Math.random() * 25;
 
-  // Ensure all words are gone at least 2s before phase ends
-  const totalPhaseDurationSec = (getFireDuration(text.split(/\s+/).filter(Boolean).length) + 12000) / 1000;
-  const maxIdx = Math.floor((totalPhaseDurationSec - 2 - animDuration) / 4);
-
-  // All hooks must be called unconditionally
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (idx > maxIdx) return;
     const show = setTimeout(() => setVisible(true), delay * 1000);
     const hide = setTimeout(() => setVisible(false), (delay + animDuration) * 1000);
     return () => { clearTimeout(show); clearTimeout(hide); };
-  }, [idx, maxIdx, delay, animDuration]);
+  }, [delay, animDuration]);
 
-  // Return early after hooks are defined
-  if (idx > maxIdx || !visible) return null;
+  if (!visible) return null;
+
   return (
     <span
       className={styles.skyDriftWord + ' ' + styles.skwTwinkleToBall}

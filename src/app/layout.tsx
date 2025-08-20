@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Roboto_Mono, Playfair_Display } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react"; // Added for Vercel Analytics
+import { Analytics } from "@vercel/analytics/react"; // Vercel Analytics
 import "./globals.css";
 
 const geistSans = Inter({
@@ -31,11 +31,32 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Preload background videos so they start instantly */}
+        <link
+          rel="preload"
+          as="video"
+          href="/animations/fire.mp4"
+          type="video/mp4"
+        />
+        <link
+          rel="preload"
+          as="video"
+          href="/animations/ocean.mp4"
+          type="video/mp4"
+        />
+        <link
+          rel="preload"
+          as="video"
+          href="/animations/nightsky.mp4"
+          type="video/mp4"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable}`}
       >
         {children}
-        <Analytics /> {/* Added here */}
+        <Analytics />
       </body>
     </html>
   );
