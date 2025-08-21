@@ -1,5 +1,4 @@
 "use client";
-import { useState, useRef, useEffect, useMemo } from "react";
 import styles from "./page.module.css";
 
 const rituals = [
@@ -480,17 +479,23 @@ export default function Home() {
               style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', objectFit: 'cover', zIndex: 0, pointerEvents: 'none'}}
             />
             {/* Sky overlay gradient */}
-            <div style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(0,0,16,0.3) 0%, rgba(0,0,16,0.1) 50%, rgba(0,0,16,0.4) 100%)'}} />
-            <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, top: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 2}}>
-              {getTextChunks(text).map((chunk, i) => (
-                <SkyDriftWord
-                  key={i}
-                  text={chunk}
-                  idx={i}
-                  _total={getTextChunks(text).length}
-                />
-              ))}
-            </div>
+            {(() => {
+  const words = text.split(/\s+/).filter(Boolean);
+  const totalDur = 40; // e.g. your nightsky.mp4 length in seconds
+  const slot = totalDur / Math.max(1, words.length);
+
+  return words.map((word, i) => (
+    <SkyDriftWord
+      key={i}
+      text={word}
+      x={10 + (i * 37) % 80} // spread across screen
+      y={15 + (i * 53) % 25}
+      delay={i * slot}
+      onFade={() => {}}
+    />
+  ));
+})()}
+
             {showSound && (
               <audio src="/sounds/nightsky.mp3.mp3" autoPlay loop />
             )}
@@ -894,52 +899,39 @@ function OceanDriftWord({ text, idx, _total, oceanPhase, forceDelay, forceDurati
   );
 }
 
-function SkyDriftWord({
-  text,
-  idx,
-  _total,
-}: {
+import { useEffect, useState,useRef } from "react";
+
+type SkyDriftWordProps = {
   text: string;
-  idx: number;
-  _total: number;
-}) {
-  // Animation timings
-  const delay = idx * 3.2; // slightly tighter spacing so last word ends sooner
-  const animDuration = 5.2; // 2s fade in + 2s twinkle + 1.2s morph/fade
+  x: number;
+  y: number;
+  delay: number;
+  onFade: () => void;
+};
 
-  const xStart = 10 + Math.random() * 80;
-  const yStart = 15 + Math.random() * 25;
-
-  // 🔹 Calculate max number of words allowed so last one ends ~2s before end
-  const totalPhaseDurationSec =
-    (getFireDuration(text.split(/\s+/).filter(Boolean).length) + 12000) / 1000;
-  const maxIdx = Math.floor(
-    (totalPhaseDurationSec - 2 - animDuration) / 3.2
-  );
-
+function SkyDriftWord({ text, x, y, delay, onFade }: SkyDriftWordProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (idx > maxIdx) return;
     const show = setTimeout(() => setVisible(true), delay * 1000);
-    const hide = setTimeout(
-      () => setVisible(false),
-      (delay + animDuration) * 1000
-    );
+    const hide = setTimeout(() => {
+      setVisible(false);
+      onFade();
+    }, delay * 1000 + 5200); // match 5.2s animation cycle
     return () => {
       clearTimeout(show);
       clearTimeout(hide);
     };
-  }, [idx, maxIdx, delay, animDuration]);
+  }, [delay, onFade]);
 
-  if (idx > maxIdx || !visible) return null;
+  if (!visible) return null;
 
   return (
     <span
-      className={styles.skyDriftWord + " " + styles.skwTwinkleToBall}
+      className={`${styles.skyDriftWord} ${styles.skwTwinkleToBall}`}
       style={{
-        left: `${xStart}vw`,
-        top: `${yStart}vh`,
+        left: `${x}vw`,
+        top: `${y}vh`,
         position: "absolute",
         pointerEvents: "none",
         zIndex: 2,
@@ -950,7 +942,8 @@ function SkyDriftWord({
         fontWeight: 400,
         fontSize: "1.1rem",
         animationDelay: `${delay}s`,
-        animationDuration: `${animDuration}s`,
+        animationDuration: `5.2s`, // matches hide timeout
+        transform: "translateX(-50%)",
       }}
     >
       {text}
