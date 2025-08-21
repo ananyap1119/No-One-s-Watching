@@ -427,23 +427,33 @@ export default function Home() {
             {/* Ocean overlay gradient */}
             <div style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to top, rgba(6,28,37,0.72) 60%, rgba(6,28,37,0.32) 100%)'}} />
             <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, top: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 2}}>
-              {/* Calculate maxTime as in handleLetGo for ocean */}
-              {(() => {
-                const oceanChunksArr = getOceanChunks(text);
-                const videoDuration = 30; // seconds (adjust if your actual video length differs)
-                const padding = 3; // seconds to leave empty at end before fade
-                const availableTime = videoDuration - padding;
-                const delayPerWord = availableTime / oceanChunksArr.length;
+            {(() => {//Split into*individual words* instead 
               
-                return oceanChunksArr.map((chunk, i) => {
-                  const delay = i * delayPerWord;
-                  const duration = delayPerWord * 0.8;
-                  return (
+              const oceanWords = text.split(/\s+/).filter(Boolean);
+
+              let maxTime = 0;
+              for (let i = 0; i < oceanWords.length; i++) {
+                const delay = i * 1.2; // slower stagger
+                const duration = 7.5 + Math.random() * 2.5;
+                const total = delay + duration;
+                if (total > maxTime) maxTime = total;
+              }
+          
+              // All words must disappear at least 5s before maxTime
+              const disappearTime = maxTime - 5;
+          
+              return oceanWords.map((word, i) => {
+                const delay = i * 1.2;
+                if (delay > disappearTime) return null;
+          
+                const maxDuration = Math.max(1, disappearTime - delay);
+                const duration = Math.min(7.5 + Math.random() * 2.5, maxDuration);
+          return(
                     <OceanDriftWord
                       key={i}
-                      text={chunk}
+                      text={word}
                       idx={i}
-                      _total={oceanChunksArr.length}
+                      _total={oceanWords.length}
                       oceanPhase={true}
                       forceDelay={delay}
                       forceDuration={duration}
@@ -884,51 +894,67 @@ function OceanDriftWord({ text, idx, _total, oceanPhase, forceDelay, forceDurati
   );
 }
 
-function SkyDriftWord({ text, idx, _total }: { text: string, idx: number, _total: number }) {
-  // Nightsky video duration (adjust if actual video differs)
-  const videoDuration = 40; // seconds
-  const padding = 3; // leave a few seconds at the end
-  const availableTime = videoDuration - padding;
+function SkyDriftWord({
+  text,
+  idx,
+  _total,
+}: {
+  text: string;
+  idx: number;
+  _total: number;
+}) {
+  // Animation timings
+  const delay = idx * 3.2; // slightly tighter spacing so last word ends sooner
+  const animDuration = 5.2; // 2s fade in + 2s twinkle + 1.2s morph/fade
 
-  // Calculate per-word timing
-  const delayPerWord = availableTime / _total;
-  const delay = idx * delayPerWord;
-  const animDuration = delayPerWord * 0.9; // each word occupies ~90% of its slot
-
-  // Random starting positions for floating effect
   const xStart = 10 + Math.random() * 80;
   const yStart = 15 + Math.random() * 25;
+
+  // 🔹 Calculate max number of words allowed so last one ends ~2s before end
+  const totalPhaseDurationSec =
+    (getFireDuration(text.split(/\s+/).filter(Boolean).length) + 12000) / 1000;
+  const maxIdx = Math.floor(
+    (totalPhaseDurationSec - 2 - animDuration) / 3.2
+  );
 
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (idx > maxIdx) return;
     const show = setTimeout(() => setVisible(true), delay * 1000);
-    const hide = setTimeout(() => setVisible(false), (delay + animDuration) * 1000);
-    return () => { clearTimeout(show); clearTimeout(hide); };
-  }, [delay, animDuration]);
+    const hide = setTimeout(
+      () => setVisible(false),
+      (delay + animDuration) * 1000
+    );
+    return () => {
+      clearTimeout(show);
+      clearTimeout(hide);
+    };
+  }, [idx, maxIdx, delay, animDuration]);
 
-  if (!visible) return null;
+  if (idx > maxIdx || !visible) return null;
 
   return (
     <span
-      className={styles.skyDriftWord + ' ' + styles.skwTwinkleToBall}
+      className={styles.skyDriftWord + " " + styles.skwTwinkleToBall}
       style={{
         left: `${xStart}vw`,
         top: `${yStart}vh`,
-        position: 'absolute',
-        pointerEvents: 'none',
+        position: "absolute",
+        pointerEvents: "none",
         zIndex: 2,
         fontFamily: `'Playfair Display', 'Georgia', serif`,
-        color: '#A8BFFF',
-        textShadow: '0px 0px 6px #A183FF',
-        letterSpacing: '0.02em',
+        color: "#A8BFFF",
+        textShadow: "0px 0px 6px #A183FF",
+        letterSpacing: "0.02em",
         fontWeight: 400,
-        fontSize: '1.1rem',
+        fontSize: "1.1rem",
         animationDelay: `${delay}s`,
         animationDuration: `${animDuration}s`,
-      } as React.CSSProperties}
+      }}
     >
       {text}
     </span>
   );
 }
+
