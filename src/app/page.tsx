@@ -957,4 +957,3 @@ function SkyDriftWord({
     </span>
   );
 }
-
