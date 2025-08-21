@@ -424,43 +424,17 @@ export default function Home() {
             {/* Ocean foam overlay */}
             <div className={styles.oceanFoamOverlay} />
             {/* Ocean overlay gradient */}
-            <div style={{position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to top, rgba(6,28,37,0.72) 60%, rgba(6,28,37,0.32) 100%)'}} />
-            <div style={{position: 'absolute', left: 0, right: 0, bottom: 0, top: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 2}}>
-            {(() => {//Split into*individual words* instead 
-              
-              const oceanWords = text.split(/\s+/).filter(Boolean);
+            { text.split(/\s+/).filter(Boolean).map((word, i) => (
+    <OceanDriftWord
+      key={i}
+      text={word}
+      x={10 + Math.random() * 80}
+      y={20 + Math.random() * 60}
+      delay={i * 1.5}   // stagger words
+      onFade={() => {}}
+    />
+)) }
 
-              let maxTime = 0;
-              for (let i = 0; i < oceanWords.length; i++) {
-                const delay = i * 1.2; // slower stagger
-                const duration = 7.5 + Math.random() * 2.5;
-                const total = delay + duration;
-                if (total > maxTime) maxTime = total;
-              }
-          
-              // All words must disappear at least 5s before maxTime
-              const disappearTime = maxTime - 5;
-          
-              return oceanWords.map((word, i) => {
-                const delay = i * 1.2;
-                if (delay > disappearTime) return null;
-          
-                const maxDuration = Math.max(1, disappearTime - delay);
-                const duration = Math.min(7.5 + Math.random() * 2.5, maxDuration);
-          return(
-                    <OceanDriftWord
-                      key={i}
-                      text={word}
-                      idx={i}
-                      _total={oceanWords.length}
-                      oceanPhase={true}
-                      forceDelay={delay}
-                      forceDuration={duration}
-                    />
-                  );
-                });
-              })()}
-            </div>
             {showSound && (
               <audio src="/sounds/ocean-waves-377295.mp3" autoPlay loop />
             )}
@@ -836,63 +810,51 @@ function BurningWord({ text, x, y, delay, onFade }: { text: string, x: number, y
 }
 
 // Add OceanDriftWord component at the end of the file
-function OceanDriftWord({ text, idx, _total, oceanPhase, forceDelay, forceDuration }: { text: string, idx: number, _total: number, oceanPhase?: boolean, forceDelay?: number, forceDuration?: number }) {
-  // Randomize animation delay, sine offset, scale, and rotation
-  const delay = forceDelay !== undefined ? forceDelay : (oceanPhase ? idx * 0.7 : 0.2 + Math.random() * 1.5 + idx * 0.44);
-  const duration = forceDuration !== undefined ? forceDuration : (oceanPhase ? 7.5 + Math.random() * 2.5 : 7.5 + Math.random() * 2.5);
-  // For ocean phase, gently randomize X (40-60vw) and Y (10-18vh) for calm, spaced entry
-  const xStart = oceanPhase ? 2 + Math.random() * 96 : 12 + Math.random() * 76;
-  const yStart = oceanPhase ? 10 + Math.random() * 10 : 8 + Math.random() * 18 + idx * 8;
-  const sinePhase = Math.random() * Math.PI * 2;
-  const scale = 0.97 + Math.random() * 0.03;
-  const rotate = -2 + Math.random() * 4; // -2 to +2 deg
-  const driftX = (Math.random() < 0.5 ? -1 : 1) * (24 + Math.random() * 32); // -24~ -56 or 24~56 px
-
-  // All hooks must be called unconditionally
-  const [visible, setVisible] = useState(!oceanPhase);
-  const [startAnim, setStartAnim] = useState(false);
+function OceanDriftWord({
+  text,
+  x,
+  y,
+  delay,
+  onFade,
+}: {
+  text: string;
+  x: number;
+  y: number;
+  delay: number;
+  onFade: () => void;
+}) {
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!oceanPhase) return;
     const show = setTimeout(() => setVisible(true), delay * 1000);
-    const hide = setTimeout(() => setVisible(false), (delay + duration) * 1000);
-    return () => { clearTimeout(show); clearTimeout(hide); };
-  }, [delay, duration, oceanPhase]);
+    const hide = setTimeout(() => {
+      setVisible(false);
+      onFade();
+    }, delay * 1000 + 6000); // word stays ~6s
+    return () => {
+      clearTimeout(show);
+      clearTimeout(hide);
+    };
+  }, [delay, onFade]);
 
-  useEffect(() => {
-    if (visible) {
-      setTimeout(() => setStartAnim(true), 30); // trigger after mount
-    } else {
-      setStartAnim(false);
-    }
-  }, [visible]);
-
-  if (oceanPhase && !visible) return null;
+  if (!visible) return null;
 
   return (
     <span
       className={styles.oceanDriftWord}
       style={{
-        left: `${xStart}vw`,
-        top: startAnim ? `80vh` : `${yStart}vh`,
-        position: 'absolute',
-        pointerEvents: 'none',
+        left: `${x}vw`,
+        top: `${y}vh`,
+        position: "absolute",
+        pointerEvents: "none",
         zIndex: 2,
         animationDelay: `${delay}s`,
-        animationDuration: `${duration}s`,
-        filter: `blur(0.2px)`,
-        transform: `translateX(-50%) scale(${scale}) rotate(${rotate}deg)`,
-        '--sine-phase': sinePhase,
-        '--drift-x': `${driftX}px`,
-        fontFamily: `'Cormorant Garamond', 'Garamond', 'Playfair Display', serif`,
-        color: '#e8f1f8',
-        textShadow: '0 0 8px #b8dcf3, 0 2px 8px #aee1f9',
-        letterSpacing: '0.04em',
-        marginBottom: '1.2em',
-        fontWeight: 500,
-        opacity: startAnim ? 0 : 1,
-        transition: `top ${duration}s cubic-bezier(0.33,1,0.68,1), opacity 1.2s linear ${duration-1.2}s`
-      } as React.CSSProperties}
+        animationDuration: "6s",
+        fontFamily: `'Playfair Display', serif`,
+        color: "#DDF7FF",
+        textShadow: "0 0 8px rgba(173, 216, 230, 0.8)",
+        fontSize: "1.1rem",
+      }}
     >
       {text}
     </span>
